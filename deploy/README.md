@@ -83,15 +83,41 @@ sudo apt-get update && sudo apt-get install -y cloudflared
 cloudflared tunnel login
 cloudflared tunnel create guardpoint
 
+# The tunnel UUID is the name of the JSON cloudflared just wrote.
+TUNNEL_ID=$(basename ~/.cloudflared/*.json .json)
+
 sudo mkdir -p /etc/cloudflared
 sudo cp /opt/guardpoint/deploy/cloudflared.yml /etc/cloudflared/config.yml
-# replace <TUNNEL-ID> with the id printed by `tunnel create`
-sudo sed -i 's/<TUNNEL-ID>/YOUR-ID/' /etc/cloudflared/config.yml
-sudo cp ~/.cloudflared/YOUR-ID.json /etc/cloudflared/
+sudo cp ~/.cloudflared/"${TUNNEL_ID}".json /etc/cloudflared/
+sudo sed -i "s|<TUNNEL-ID>|${TUNNEL_ID}|g" /etc/cloudflared/config.yml
+sudo chmod 600 /etc/cloudflared/*.json
 
-cloudflared tunnel route dns guardpoint guardpoint-test.waletech.org
+# Sanity check: the second line must name a file that exists.
+grep -E '^(tunnel|credentials-file):' /etc/cloudflared/config.yml
+sudo ls -l /etc/cloudflared/
+
+# Test in the foreground BEFORE installing the service. If the config is
+# wrong, cloudflared exits here with a real message instead of an opaque
+# systemd exit code. Expect "Registered tunnel connection". Ctrl-C to stop.
+sudo cloudflared --config /etc/cloudflared/config.yml tunnel run
+
 sudo cloudflared service install
+cloudflared tunnel route dns guardpoint guardpoint-test.waletech.org
 ```
+
+### Troubleshooting
+
+**`cloudflared.service` fails to start with exit code 1.** Almost always a
+bad `credentials-file` path in `/etc/cloudflared/config.yml` — typically the
+literal `<TUNNEL-ID>` placeholder was never substituted. Check with the
+`grep` above, fix it, then `sudo systemctl restart cloudflared`.
+
+**`cp: cannot stat '.../YOUR-ID.json'`.** You are meant to substitute the
+*real* UUID, not the literal text `YOUR-ID`. Use `TUNNEL_ID=$(basename
+~/.cloudflared/*.json .json)` as above.
+
+**502 from Cloudflare.** The tunnel is up but the app is not. Check
+`curl -s http://127.0.0.1:8000/api/health` and `journalctl -u guardpoint`.
 
 ### 5. Gate it with Cloudflare Access — do not skip
 

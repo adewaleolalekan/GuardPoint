@@ -85,13 +85,19 @@ Done. GuardPoint is listening on 127.0.0.1:8000 and is NOT reachable
 from the internet yet. To publish it:
 
   1. Install cloudflared (see deploy/README.md).
-  2. Copy deploy/cloudflared.yml to /etc/cloudflared/config.yml
-     and replace <TUNNEL-ID>.
-  3. cloudflared tunnel login
+  2. cloudflared tunnel login
      cloudflared tunnel create guardpoint
+     TUNNEL_ID=\$(basename ~/.cloudflared/*.json .json)
+  3. sudo cp deploy/cloudflared.yml /etc/cloudflared/config.yml
+     sudo cp ~/.cloudflared/"\${TUNNEL_ID}".json /etc/cloudflared/
+     sudo sed -i "s|<TUNNEL-ID>|\${TUNNEL_ID}|g" /etc/cloudflared/config.yml
+     sudo chmod 600 /etc/cloudflared/*.json
+  4. Test in the foreground first — a bad credentials path is the usual
+     reason "service install" reports exit code 1:
+       sudo cloudflared --config /etc/cloudflared/config.yml tunnel run
+  5. sudo cloudflared service install
      cloudflared tunnel route dns guardpoint guardpoint-test.waletech.org
-  4. systemctl enable --now cloudflared
-  5. Add a Cloudflare Access policy — this app has NO authentication
+  6. Add a Cloudflare Access policy — this app has NO authentication
      of its own.
 
 Logs: journalctl -u guardpoint -f
