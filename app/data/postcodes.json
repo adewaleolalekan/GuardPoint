@@ -1,0 +1,269 @@
+{
+  "_comment": "Simulated slice of Nigeria's national postcode registry. Shapes mirror the documented NIPOST responses (lookup levels L1-L5, reverse geocode). Coordinates are [lng, lat]. Used only when no live POSTCODE_API_KEY is configured.",
+  "states": [
+    { "code": "FC", "name": "FEDERAL CAPITAL TERRITORY" },
+    { "code": "LA", "name": "LAGOS" },
+    { "code": "RI", "name": "RIVERS" },
+    { "code": "KN", "name": "KANO" },
+    { "code": "OG", "name": "OGUN" },
+    { "code": "EN", "name": "ENUGU" },
+    { "code": "EK", "name": "EKITI" },
+    { "code": "AK", "name": "AKWA IBOM" },
+    { "code": "BA", "name": "BAUCHI" },
+    { "code": "AN", "name": "ANAMBRA" }
+  ],
+  "lgas": {
+    "FC": [
+      { "code": "01", "name": "ABAJI" },
+      { "code": "02", "name": "GWAGWALADA" },
+      { "code": "03", "name": "KUJE" },
+      { "code": "04", "name": "MUNICIPAL AREA COUNCIL" },
+      { "code": "05", "name": "BWARI" }
+    ],
+    "LA": [
+      { "code": "01", "name": "IKEJA" },
+      { "code": "02", "name": "LAGOS ISLAND" },
+      { "code": "03", "name": "ETI OSA" },
+      { "code": "04", "name": "SURULERE" },
+      { "code": "05", "name": "APAPA" }
+    ],
+    "RI": [
+      { "code": "01", "name": "PORT HARCOURT" },
+      { "code": "02", "name": "OBIO/AKPOR" },
+      { "code": "03", "name": "ELEME" }
+    ],
+    "KN": [
+      { "code": "01", "name": "DALA" },
+      { "code": "02", "name": "FAGGE" },
+      { "code": "03", "name": "NASARAWA" }
+    ],
+    "OG": [{ "code": "01", "name": "ABEOKUTA SOUTH" }, { "code": "02", "name": "IJEBU ODE" }],
+    "EN": [{ "code": "01", "name": "ENUGU NORTH" }, { "code": "02", "name": "ENUGU SOUTH" }],
+    "EK": [{ "code": "01", "name": "ADO EKITI" }, { "code": "02", "name": "IKERE" }],
+    "AK": [{ "code": "01", "name": "UYO" }, { "code": "02", "name": "Eket" }],
+    "BA": [{ "code": "01", "name": "BAUCHI" }, { "code": "02", "name": "Tafawa Balewa" }],
+    "AN": [{ "code": "01", "name": "ONITSHA NORTH" }, { "code": "02", "name": "AWKA SOUTH" }]
+  },
+  "units": [
+    {
+      "postcode": "FC-04-A01-MH-01",
+      "state_name": "FEDERAL CAPITAL TERRITORY",
+      "lga_name": "MUNICIPAL AREA COUNCIL",
+      "locality_name": "WUSE",
+      "zone": "NORTH CENTRAL",
+      "recent_house_address": "12 MARINA ROAD, WUSE ZONE 4, ABUJA",
+      "building_use_status": "commercial",
+      "coordinates": [7.4746, 9.0765],
+      "other_building_info": { "floors": 4, "year_built": 2016, "street": "MARINA ROAD" }
+    },
+    {
+      "postcode": "FC-04-A02-KP-27",
+      "state_name": "FEDERAL CAPITAL TERRITORY",
+      "lga_name": "MUNICIPAL AREA COUNCIL",
+      "locality_name": "GARKI",
+      "zone": "NORTH CENTRAL",
+      "recent_house_address": "PLOT 447, AHMADU BELLO WAY, GARKI II, ABUJA",
+      "building_use_status": "commercial",
+      "coordinates": [7.4899, 9.0563],
+      "other_building_info": { "floors": 12, "year_built": 2012, "street": "AHMADU BELLO WAY" }
+    },
+    {
+      "postcode": "FC-05-B06-AG-12",
+      "state_name": "FEDERAL CAPITAL TERRITORY",
+      "lga_name": "BWARI",
+      "locality_name": "BWARI",
+      "zone": "NORTH CENTRAL",
+      "recent_house_address": "KM 20 BWARI-KUJE ROAD, BWARI, ABUJA",
+      "building_use_status": "industrial",
+      "coordinates": [7.3667, 9.05],
+      "other_building_info": { "floors": 2, "year_built": 2019, "street": "BWARI-KUJE ROAD" }
+    },
+    {
+      "postcode": "LA-01-C11-TC-10",
+      "state_name": "LAGOS",
+      "lga_name": "IKEJA",
+      "locality_name": "IKEJA GRA",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "24 OBA AKRAN AVENUE, IKEJA GRA, LAGOS",
+      "building_use_status": "commercial",
+      "coordinates": [3.3417, 6.5833],
+      "other_building_info": { "floors": 6, "year_built": 2014, "street": "OBA AKRAN AVENUE" }
+    },
+    {
+      "postcode": "LA-02-D22-ZR-63",
+      "state_name": "LAGOS",
+      "lga_name": "LAGOS ISLAND",
+      "locality_name": "VICTORIA ISLAND",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "1 ADEOLA ODEKU STREET, VICTORIA ISLAND, LAGOS",
+      "building_use_status": "commercial",
+      "coordinates": [3.4232, 6.4281],
+      "other_building_info": { "floors": 18, "year_built": 2018, "street": "ADEOLA ODEKU STREET" }
+    },
+    {
+      "postcode": "LA-03-E33-WQ-44",
+      "state_name": "LAGOS",
+      "lga_name": "ETI OSA",
+      "locality_name": "LEKKI PHASE 1",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "PLOT 5, ADMIRALTY WAY, LEKKI PHASE 1, LAGOS",
+      "building_use_status": "commercial",
+      "coordinates": [3.465, 6.435],
+      "other_building_info": { "floors": 8, "year_built": 2020, "street": "ADMIRALTY WAY" }
+    },
+    {
+      "postcode": "LA-04-F44-BL-69",
+      "state_name": "LAGOS",
+      "lga_name": "SURULERE",
+      "locality_name": "YABA",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "58 HERBERT MACAULAY ROAD, YABA, LAGOS",
+      "building_use_status": "mixed",
+      "coordinates": [3.3792, 6.5095],
+      "other_building_info": { "floors": 3, "year_built": 2009, "street": "HERBERT MACAULAY ROAD" }
+    },
+    {
+      "postcode": "LA-05-G55-NE-30",
+      "state_name": "LAGOS",
+      "lga_name": "APAPA",
+      "locality_name": "APAPA",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "WHARF ROAD, APAPA, LAGOS",
+      "building_use_status": "industrial",
+      "coordinates": [3.3592, 6.4487],
+      "other_building_info": { "floors": 2, "year_built": 2007, "street": "WHARF ROAD" }
+    },
+    {
+      "postcode": "RI-01-H66-FR-90",
+      "state_name": "RIVERS",
+      "lga_name": "PORT HARCOURT",
+      "locality_name": "OLD GRA",
+      "zone": "SOUTH SOUTH",
+      "recent_house_address": "12 BONNY STREET, OLD GRA, PORT HARCOURT",
+      "building_use_status": "commercial",
+      "coordinates": [7.0134, 4.7774],
+      "other_building_info": { "floors": 5, "year_built": 2013, "street": "BONNY STREET" }
+    },
+    {
+      "postcode": "RI-02-I77-AB-30",
+      "state_name": "RIVERS",
+      "lga_name": "OBIO/AKPOR",
+      "locality_name": "RUMUOKORO",
+      "zone": "SOUTH SOUTH",
+      "recent_house_address": "EAST-WEST ROAD, RUMUOKORO, PORT HARCOURT",
+      "building_use_status": "residential",
+      "coordinates": [6.9886, 4.8291],
+      "other_building_info": { "floors": 2, "year_built": 2015, "street": "EAST-WEST ROAD" }
+    },
+    {
+      "postcode": "KN-02-J88-CD-22",
+      "state_name": "KANO",
+      "lga_name": "FAGGE",
+      "locality_name": "SABON GARI",
+      "zone": "NORTH WEST",
+      "recent_house_address": "FRANCE ROAD, SABON GARI, KANO",
+      "building_use_status": "mixed",
+      "coordinates": [8.524, 12.0],
+      "other_building_info": { "floors": 3, "year_built": 2011, "street": "FRANCE ROAD" }
+    },
+    {
+      "postcode": "KN-01-K99-VM-58",
+      "state_name": "KANO",
+      "lga_name": "DALA",
+      "locality_name": "DALA",
+      "zone": "NORTH WEST",
+      "recent_house_address": "KOFAR WAJEN DALA, KANO",
+      "building_use_status": "residential",
+      "coordinates": [8.51, 12.005],
+      "other_building_info": { "floors": 1, "year_built": 2005, "street": "KOFAR WAJEN DALA" }
+    },
+    {
+      "postcode": "OG-01-L10-WJ-80",
+      "state_name": "OGUN",
+      "lga_name": "ABEOKUTA SOUTH",
+      "locality_name": "IBARA",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "23 QUARRY ROAD, IBARA, ABEOKUTA",
+      "building_use_status": "commercial",
+      "coordinates": [3.345, 7.1475],
+      "other_building_info": { "floors": 3, "year_built": 2017, "street": "QUARRY ROAD" }
+    },
+    {
+      "postcode": "EN-01-M21-JP-23",
+      "state_name": "ENUGU",
+      "lga_name": "ENUGU NORTH",
+      "locality_name": "OGUI",
+      "zone": "SOUTH EAST",
+      "recent_house_address": "10 ZIK AVENUE, OGUI, ENUGU",
+      "building_use_status": "commercial",
+      "coordinates": [7.4985, 6.452],
+      "other_building_info": { "floors": 4, "year_built": 2012, "street": "ZIK AVENUE" }
+    },
+    {
+      "postcode": "EK-01-A03-FK-01",
+      "state_name": "EKITI",
+      "lga_name": "ADO EKITI",
+      "locality_name": "ADO EKITI",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "NTA ROAD, BACK OF FABIAN HOTEL, ADO EKITI",
+      "building_use_status": "residential",
+      "coordinates": [5.2214, 7.6211],
+      "other_building_info": { "floors": 2, "year_built": 2010, "street": "NTA ROAD" }
+    },
+    {
+      "postcode": "AK-01-N32-IQ-38",
+      "state_name": "AKWA IBOM",
+      "lga_name": "UYO",
+      "locality_name": "UYO",
+      "zone": "SOUTH SOUTH",
+      "recent_house_address": "WELLINGTON BASSEY WAY, UYO",
+      "building_use_status": "commercial",
+      "coordinates": [7.9333, 5.0378],
+      "other_building_info": { "floors": 5, "year_built": 2016, "street": "WELLINGTON BASSEY WAY" }
+    },
+    {
+      "postcode": "BA-01-O43-LR-01",
+      "state_name": "BAUCHI",
+      "lga_name": "BAUCHI",
+      "locality_name": "BAUCHI",
+      "zone": "NORTH EAST",
+      "recent_house_address": "AHMADU BELLO WAY, BAUCHI",
+      "building_use_status": "commercial",
+      "coordinates": [9.8442, 10.3103],
+      "other_building_info": { "floors": 3, "year_built": 2014, "street": "AHMADU BELLO WAY" }
+    },
+    {
+      "postcode": "AN-01-P54-MV-01",
+      "state_name": "ANAMBRA",
+      "lga_name": "ONITSHA NORTH",
+      "locality_name": "ONITSHA",
+      "zone": "SOUTH EAST",
+      "recent_house_address": "12 NEW MARKET ROAD, ONITSHA",
+      "building_use_status": "commercial",
+      "coordinates": [6.7857, 6.1414],
+      "other_building_info": { "floors": 4, "year_built": 2013, "street": "NEW MARKET ROAD" }
+    },
+    {
+      "postcode": "LA-02-Q65-MW-01",
+      "state_name": "LAGOS",
+      "lga_name": "LAGOS ISLAND",
+      "locality_name": "IDUMOTA",
+      "zone": "SOUTH WEST",
+      "recent_house_address": "IDUMOTA MARKET, LAGOS ISLAND",
+      "building_use_status": "commercial",
+      "coordinates": [3.396, 6.46],
+      "other_building_info": { "floors": 3, "year_built": 1998, "street": "IDUMOTA MARKET" }
+    },
+    {
+      "postcode": "FC-04-R76-DA-10",
+      "state_name": "FEDERAL CAPITAL TERRITORY",
+      "lga_name": "MUNICIPAL AREA COUNCIL",
+      "locality_name": "ASOKORO",
+      "zone": "NORTH CENTRAL",
+      "recent_house_address": "PLOT 1100, SHEHU SHAGARI WAY, ASOKORO, ABUJA",
+      "building_use_status": "commercial",
+      "coordinates": [7.4833, 9.0333],
+      "other_building_info": { "floors": 9, "year_built": 2015, "street": "SHEHU SHAGARI WAY" }
+    }
+  ]
+}

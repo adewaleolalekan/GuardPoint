@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GuardPoint — Postcode-anchored risk &amp; compliance</title>
+<style>
+  :root {
+    --bg: #0b1120;
+    --surface: #121a2e;
+    --surface-2: #1a2439;
+    --line: #263149;
+    --text: #e6ecf7;
+    --muted: #8a99b8;
+    --brand: #3b82f6;
+    --brand-2: #22d3ee;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --critical: #b91c1c;
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(1200px 600px at 80% -10%, #16233f 0%, var(--bg) 55%);
+    color: var(--text);
+    font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--brand-2); }
+  header.top {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px; border-bottom: 1px solid var(--line);
+    background: rgba(11,17,32,.8); backdrop-filter: blur(8px);
+    position: sticky; top: 0; z-index: 20;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .2px; }
+  .logo .mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    display: grid; place-items: center; color: #04122b; font-weight: 900; font-size: 16px;
+  }
+  .logo small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+  .spacer { flex: 1; }
+  .mode-pill {
+    font-size: 12px; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); background: var(--surface);
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,.15); }
+  .dot.sim { background: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,.15); }
+
+  nav.tabs { display: flex; gap: 4px; padding: 12px 24px 0; flex-wrap: wrap; }
+  nav.tabs button {
+    background: transparent; border: 1px solid transparent; color: var(--muted);
+    padding: 9px 14px; border-radius: 10px 10px 0 0; cursor: pointer; font-size: 14px; font-weight: 600;
+  }
+  nav.tabs button:hover { color: var(--text); }
+  nav.tabs button.active { color: var(--text); background: var(--surface); border-color: var(--line); border-bottom-color: var(--surface); }
+
+  main { padding: 20px 24px 60px; max-width: 1240px; margin: 0 auto; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .grid { display: grid; gap: 18px; }
+  .cols-2 { grid-template-columns: 380px 1fr; }
+  @media (max-width: 900px) { .cols-2 { grid-template-columns: 1fr; } }
+  h2 { margin: 0 0 4px; font-size: 18px; }
+  h3 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  p.hint { color: var(--muted); margin: 0 0 16px; font-size: 13.5px; }
+  label { display: block; font-size: 12.5px; color: var(--muted); margin: 12px 0 5px; font-weight: 600; }
+  input, select, textarea {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--text); font: inherit;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid rgba(59,130,246,.5); border-color: var(--brand); }
+  textarea { resize: vertical; min-height: 64px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  button.primary {
+    margin-top: 18px; width: 100%; padding: 12px 16px; border: 0; border-radius: 10px; cursor: pointer;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #04122b; font-weight: 800; font-size: 15px;
+  }
+  button.primary:hover { filter: brightness(1.07); }
+  button.ghost {
+    background: var(--surface-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 10px; padding: 9px 13px; cursor: pointer; font-weight: 600; font-size: 13px;
+  }
+  button.ghost:hover { border-color: var(--brand); }
+
+  .verdict { display: flex; align-items: center; gap: 18px; padding: 18px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface-2); }
+  .score-ring { --v: 0; width: 96px; height: 96px; border-radius: 50%; flex: 0 0 auto;
+    background: conic-gradient(var(--ring) calc(var(--v) * 1%), #22304c 0);
+    display: grid; place-items: center; position: relative; }
+  .score-ring::after { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: var(--surface-2); }
+  .score-ring .num { position: relative; font-size: 26px; font-weight: 800; }
+  .verdict .meta h2 { font-size: 20px; }
+  .verdict .meta .sub { color: var(--muted); font-size: 13.5px; }
+  .badge { display: inline-block; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  .b-approve { background: rgba(34,197,94,.15); color: #4ade80; border: 1px solid rgba(34,197,94,.35); }
+  .b-review  { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.35); }
+  .b-block   { background: rgba(239,68,68,.16); color: #f87171; border: 1px solid rgba(239,68,68,.4); }
+  .b-low      { background: rgba(34,197,94,.12); color: #4ade80; }
+  .b-medium   { background: rgba(59,130,246,.14); color: #93c5fd; }
+  .b-high     { background: rgba(245,158,11,.14); color: #fbbf24; }
+  .b-critical { background: rgba(239,68,68,.16); color: #f87171; }
+
+  .signals { margin-top: 16px; }
+  .signal { display: grid; grid-template-columns: 78px 1fr auto; gap: 12px; align-items: start;
+    padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); margin-bottom: 8px; }
+  .signal .cat { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; padding-top: 2px; }
+  .signal .lbl { font-weight: 700; font-size: 14px; }
+  .signal .ev { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .signal .w { font-weight: 800; color: #fbbf24; font-variant-numeric: tabular-nums; }
+  .checks { margin-top: 10px; }
+  .check { display: flex; gap: 10px; align-items: baseline; padding: 6px 2px; font-size: 13.5px; border-bottom: 1px dashed var(--line); }
+  .check:last-child { border-bottom: 0; }
+  .check .ico { width: 18px; text-align: center; }
+  .check .nm { font-weight: 600; min-width: 250px; }
+  .check .dt { color: var(--muted); }
+  .ok { color: var(--green); } .no { color: var(--red); }
+  .actions { margin-top: 16px; }
+  .actions li { margin: 6px 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  tbody tr:hover { background: var(--surface-2); cursor: pointer; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi .v { font-size: 26px; font-weight: 800; }
+  .kpi .k { color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; }
+  .empty { color: var(--muted); text-align: center; padding: 40px 10px; }
+  code { background: var(--surface-2); border: 1px solid var(--line); padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .toast { position: fixed; bottom: 22px; right: 22px; background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--brand); border-radius: 10px; padding: 12px 16px; box-shadow: var(--shadow); max-width: 380px; }
+  .hidden { display: none !important; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; margin-right: 7px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo">
+    <div class="mark">GP</div>
+    <div>GuardPoint<small>Postcode-anchored risk &amp; compliance</small></div>
+  </div>
+  <div class="spacer"></div>
+  <div class="mode-pill" id="modePill"><span class="dot sim"></span> checking…</div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="verify" class="active">Verify a client</button>
+  <button data-tab="portfolio">Portfolio</button>
+  <button data-tab="postcode">Postcode explorer</button>
+  <button data-tab="audit">Audit trail</button>
+</nav>
+
+<main>
+  <!-- VERIFY -->
+  <section id="tab-verify">
+    <div class="grid cols-2">
+      <div class="panel">
+        <h2>Run a verification</h2>
+        <p class="hint">Pick a client from the book or enter details for a one-off check. The declared address is cross-checked against the NIPOST postcode registry.</p>
+        <label for="clientSelect">Client on the book</label>
+        <select id="clientSelect"><option value="">— choose a client —</option></select>
+
+        <label for="fName">Legal name</label>
+        <input id="fName" placeholder="e.g. Acme Nigeria Ltd" />
+        <div class="row">
+          <div>
+            <label for="fSector">Sector</label>
+            <select id="fSector"></select>
+          </div>
+          <div>
+            <label for="fPostcode">Postcode</label>
+            <input id="fPostcode" placeholder="FC-04-A01-MH-01" class="mono" />
+          </div>
+        </div>
+        <label for="fAddress">Declared address</label>
+        <input id="fAddress" placeholder="12 Marina Road, Wuse, Abuja" />
+        <div class="row">
+          <div>
+            <label for="fLng">Longitude (optional)</label>
+            <input id="fLng" placeholder="7.4746" />
+          </div>
+          <div>
+            <label for="fLat">Latitude (optional)</label>
+            <input id="fLat" placeholder="9.0765" />
+          </div>
+        </div>
+        <label for="fDesc">Business description</label>
+        <textarea id="fDesc" placeholder="What the business does…"></textarea>
+        <div class="row">
+          <div>
+            <label for="fRc">CAC / RC number</label>
+            <input id="fRc" placeholder="RC1044211" class="mono" />
+          </div>
+          <div>
+            <label for="fTax">Tax ID (TIN)</label>
+            <input id="fTax" placeholder="TIN-20441288-0001" class="mono" />
+          </div>
+        </div>
+        <button class="primary" id="runBtn">Assess risk</button>
+      </div>
+
+      <div class="panel" id="resultPanel">
+        <div class="empty">Run a verification to see the risk verdict, the signals behind it and the required actions.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="tab-portfolio" class="hidden">
+    <div class="kpis">
+      <div class="kpi"><div class="v" id="kpiTotal">—</div><div class="k">Clients</div></div>
+      <div class="kpi"><div class="v ok" id="kpiApprove">—</div><div class="k">Approved</div></div>
+      <div class="kpi"><div class="v" style="color:#fbbf24" id="kpiReview">—</div><div class="k">Needs review</div></div>
+      <div class="kpi"><div class="v no" id="kpiBlock">—</div><div class="k">Blocked</div></div>
+    </div>
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div><h2 style="margin:0">Client portfolio</h2><p class="hint" style="margin:2px 0 0">Ranked by risk score. Click a row to open the full assessment.</p></div>
+        <div class="spacer"></div>
+        <button class="ghost" id="screenBtn">Screen all clients</button>
+      </div>
+      <div id="portfolioBody"><div class="empty">Loading…</div></div>
+    </div>
+  </section>
+
+  <!-- POSTCODE -->
+  <section id="tab-postcode" class="hidden">
+    <div class="grid cols-2">
+      <div class="panel">
+        <h2>Postcode explorer</h2>
+        <p class="hint">Direct pass-through to the NIPOST gateway, so you can inspect the registry yourself.</p>
+        <label for="pcInput">Postcode</label>
+        <input id="pcInput" class="mono" value="FC-04-A01-MH-01" />
+        <label for="pcLevel">Lookup level</label>
+        <select id="pcLevel">
+          <option value="1">L1 — validity only (free)</option>
+          <option value="2">L2 — + administrative address (credits)</option>
+          <option value="3" selected>L3 — + building use (credits)</option>
+          <option value="4">L4 — + other building info (credits)</option>
+          <option value="5">L5 — + point geometry (restricted)</option>
+        </select>
+        <button class="primary" id="pcBtn">Look up</button>
+        <label for="acInput" style="margin-top:22px">Autocomplete</label>
+        <input id="acInput" class="mono" placeholder="LA02" />
+        <button class="ghost" id="acBtn" style="margin-top:10px">Suggest</button>
+      </div>
+      <div class="panel">
+        <h3>Result</h3>
+        <pre id="pcResult" class="mono" style="white-space:pre-wrap;word-break:break-word;color:var(--muted);margin:0">Nothing yet.</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUDIT -->
+  <section id="tab-audit" class="hidden">
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div><h2 style="margin:0">Audit trail</h2><p class="hint" style="margin:2px 0 0">Every verification and screen, with a hashed subject where the identifier is personal.</p></div>
+        <div class="spacer"></div>
+        <button class="ghost" id="auditRefresh">Refresh</button>
+      </div>
+      <div id="auditBody"><div class="empty">Loading…</div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const api = async (path, opts) => {
+  const r = await fetch(path, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail?.error?.message || body.detail || body.error?.message || `HTTP ${r.status}`);
+  return body;
+};
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const decisionClass = (d) => ({approve:"b-approve", review:"b-review", block:"b-block"}[d] || "b-review");
+const tierClass = (t) => `b-${t}`;
+const ringColor = (s) => s >= 70 ? "var(--red)" : s >= 40 ? "var(--amber)" : "var(--green)";
+
+function toast(msg, isErr) {
+  const el = document.createElement("div");
+  el.className = "toast";
+  if (isErr) el.style.borderLeftColor = "var(--red)";
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+// ---- tabs ----
+document.querySelectorAll("nav.tabs button").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll("nav.tabs button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    ["verify","portfolio","postcode","audit"].forEach(t =>
+      $("#tab-" + t).classList.toggle("hidden", t !== btn.dataset.tab));
+    if (btn.dataset.tab === "portfolio") loadPortfolio();
+    if (btn.dataset.tab === "audit") loadAudit();
+  };
+});
+
+// ---- meta + client book ----
+let CLIENTS = [];
+async function boot() {
+  try {
+    const h = await api("/api/health");
+    const live = h.mode === "live";
+    $("#modePill").innerHTML = `<span class="dot ${live ? "" : "sim"}"></span> ${live ? "Live gateway" : "Simulated registry"} · max L${h.max_level}`;
+  } catch (e) { $("#modePill").textContent = "offline"; }
+
+  const pol = await api("/api/policy");
+  const sel = $("#fSector");
+  sel.innerHTML = Object.entries(pol.sector_tiers)
+    .map(([k, v]) => `<option value="${k}">${esc(k.replace(/_/g," "))} — ${v}</option>`).join("");
+
+  const book = await api("/api/clients");
+  CLIENTS = book.clients;
+  $("#clientSelect").innerHTML = '<option value="">— choose a client —</option>' +
+    CLIENTS.map(c => `<option value="${c.id}">${esc(c.id)} · ${esc(c.name)}</option>`).join("");
+}
+
+$("#clientSelect").onchange = async (e) => {
+  if (!e.target.value) return;
+  try {
+    const { client } = await api(`/api/clients/${e.target.value}`);
+    $("#fName").value = client.name || "";
+    $("#fSector").value = client.sector || "unknown";
+    $("#fPostcode").value = client.postcode || "";
+    $("#fAddress").value = client.declared_address || "";
+    $("#fDesc").value = client.business_description || "";
+    $("#fRc").value = client.rc_number || "";
+    $("#fTax").value = client.tax_id || "";
+    const co = client.declared_coordinates || [];
+    $("#fLng").value = co[0] ?? "";
+    $("#fLat").value = co[1] ?? "";
+    const res = await api(`/api/verify/${client.id}?persist=false`);
+    renderResult(res, client);
+  } catch (err) { toast(err.message, true); }
+};
+
+$("#runBtn").onclick = async () => {
+  const body = {
+    id: "ADHOC",
+    name: $("#fName").value || "Ad hoc check",
+    sector: $("#fSector").value || "unknown",
+    postcode: $("#fPostcode").value || null,
+    declared_address: $("#fAddress").value || null,
+    business_description: $("#fDesc").value || null,
+    rc_number: $("#fRc").value || null,
+    tax_id: $("#fTax").value || null,
+    registration_status: "active",
+    directors: []
+  };
+  const lng = parseFloat($("#fLng").value), lat = parseFloat($("#fLat").value);
+  if (!isNaN(lng) && !isNaN(lat)) body.declared_coordinates = [lng, lat];
+  const btn = $("#runBtn");
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Assessing…';
+  try {
+    const res = await api("/api/verify", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+    renderResult(res, null);
+  } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = "Assess risk"; }
+};
+
+function renderResult(r, clientMeta) {
+  const reg = r.registry || {};
+  const admin = reg.administrative_address || {};
+  const sig = r.signals || [];
+  const checks = r.checks || [];
+  const html = `
+    <div class="verdict">
+      <div class="score-ring" style="--v:${r.score};--ring:${ringColor(r.score)}"><span class="num">${r.score}</span></div>
+      <div class="meta">
+        <h2>${esc(r.client_name)}</h2>
+        <div class="sub">${esc(r.sector.replace(/_/g," "))} · <span class="mono">${esc(r.postcode || "no postcode")}</span> · record #${r.record_id ?? "—"}</div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <span class="badge ${decisionClass(r.decision)}">${esc(r.decision)}</span>
+          <span class="badge ${tierClass(r.tier)}">${esc(r.tier)} risk</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="signals">
+      <h3>Signals (${sig.length})</h3>
+      ${sig.length ? sig.map(s => `
+        <div class="signal">
+          <div class="cat">${esc(s.category)}</div>
+          <div><div class="lbl">${esc(s.label)}</div><div class="ev">${esc(s.evidence)}</div></div>
+          <div class="w">+${s.weight}</div>
+        </div>`).join("") : '<div class="empty" style="padding:18px">No adverse signals.</div>'}
+    </div>
+
+    <div class="checks">
+      <h3>Checks performed</h3>
+      ${checks.map(c => `
+        <div class="check">
+          <div class="ico ${c.passed ? "ok" : "no"}">${c.passed ? "✓" : "✗"}</div>
+          <div class="nm">${esc(c.name)}</div>
+          <div class="dt">${esc(c.detail)} <span class="muted">· ${esc(c.source)}</span></div>
+        </div>`).join("")}
+    </div>
+
+    ${reg.postcode ? `
+    <div style="margin-top:16px">
+      <h3>Registry record (level L${reg.level_served})</h3>
+      <table>
+        <tbody>
+          <tr><td class="muted">Registered address</td><td>${esc(reg.recent_house_address || "—")}</td></tr>
+          <tr><td class="muted">Area / LGA / State</td><td>${esc(admin.locality_name || "—")} · ${esc(admin.lga_name || "—")} · ${esc(admin.state_name || "—")}</td></tr>
+          <tr><td class="muted">Zone</td><td>${esc(admin.zone || "—")}</td></tr>
+          <tr><td class="muted">Building use</td><td>${esc(reg.building_use_status || "—")}</td></tr>
+        </tbody>
+      </table>
+    </div>` : ""}
+
+    <div class="actions">
+      <h3>Required actions</h3>
+      <ul>${(r.required_actions || []).map(a => `<li>${esc(a)}</li>`).join("")}</ul>
+    </div>
+  `;
+  $("#resultPanel").innerHTML = html;
+}
+
+// ---- portfolio ----
+async function loadPortfolio() {
+  try {
+    const data = await api("/api/portfolio/screen?persist=false", { method: "POST" });
+    renderPortfolio(data);
+  } catch (e) { $("#portfolioBody").innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+function renderPortfolio(data) {
+  $("#kpiTotal").textContent = data.count;
+  $("#kpiApprove").textContent = data.decisions.approve || 0;
+  $("#kpiReview").textContent = data.decisions.review || 0;
+  $("#kpiBlock").textContent = data.decisions.block || 0;
+  const rows = data.results.map(r => `
+    <tr data-id="${esc(r.client_id)}">
+      <td>${esc(r.client_id)}</td>
+      <td>${esc(r.client_name)}</td>
+      <td class="muted">${esc(r.sector.replace(/_/g," "))}</td>
+      <td class="mono muted">${esc(r.postcode || "—")}</td>
+      <td class="num"><b>${r.score}</b></td>
+      <td><span class="badge ${tierClass(r.tier)}">${esc(r.tier)}</span></td>
+      <td><span class="badge ${decisionClass(r.decision)}">${esc(r.decision)}</span></td>
+    </tr>`).join("");
+  $("#portfolioBody").innerHTML = `<table>
+    <thead><tr><th>ID</th><th>Client</th><th>Sector</th><th>Postcode</th><th class="num">Score</th><th>Tier</th><th>Decision</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+  document.querySelectorAll("#portfolioBody tbody tr").forEach(tr => {
+    tr.onclick = async () => {
+      const res = await api(`/api/verify/${tr.dataset.id}?persist=false`);
+      document.querySelector('nav.tabs button[data-tab="verify"]').click();
+      renderResult(res, null);
+    };
+  });
+}
+$("#screenBtn").onclick = async () => {
+  const btn = $("#screenBtn"); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Screening…';
+  try { const data = await api("/api/portfolio/screen", { method:"POST" }); renderPortfolio(data); toast(`Screened ${data.count} clients and wrote them to the audit trail.`); }
+  catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = "Screen all clients"; }
+};
+
+// ---- postcode explorer ----
+$("#pcBtn").onclick = async () => {
+  try {
+    const r = await api(`/api/postcode/lookup?code=${encodeURIComponent($("#pcInput").value)}&level=${$("#pcLevel").value}`);
+    $("#pcResult").textContent = JSON.stringify(r, null, 2);
+  } catch (e) { $("#pcResult").textContent = "Error: " + e.message; }
+};
+$("#acBtn").onclick = async () => {
+  try {
+    const r = await api(`/api/postcode/autocomplete?q=${encodeURIComponent($("#acInput").value)}`);
+    $("#pcResult").textContent = JSON.stringify(r, null, 2);
+  } catch (e) { $("#pcResult").textContent = "Error: " + e.message; }
+};
+
+// ---- audit ----
+async function loadAudit() {
+  try {
+    const data = await api("/api/audit?limit=100");
+    if (!data.entries.length) { $("#auditBody").innerHTML = '<div class="empty">No activity yet.</div>'; return; }
+    $("#auditBody").innerHTML = `<table>
+      <thead><tr><th>#</th><th>When (UTC)</th><th>Actor</th><th>Action</th><th>Subject</th><th>Detail</th></tr></thead>
+      <tbody>${data.entries.map(e => `<tr>
+        <td class="muted">${e.id}</td>
+        <td class="muted mono">${esc(e.created_at)}</td>
+        <td>${esc(e.actor)}</td>
+        <td><b>${esc(e.action)}</b></td>
+        <td class="mono">${e.subject_hash ? esc(e.subject_hash.slice(0,16)) + "…" : esc(e.subject || "—")}</td>
+        <td class="muted">${e.detail ? esc(JSON.stringify(e.detail)) : "—"}</td>
+      </tr>`).join("")}</tbody></table>`;
+  } catch (e) { $("#auditBody").innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+$("#auditRefresh").onclick = loadAudit;
+
+boot();
+</script>
+</body>
+</html>
