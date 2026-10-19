@@ -69,9 +69,16 @@ class Store:
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
-        conn = sqlite3.connect(self.path)
+        # timeout=30 is the busy timeout: wait rather than raising
+        # "database is locked" the moment another writer holds the file.
+        conn = sqlite3.connect(self.path, timeout=30)
         conn.row_factory = sqlite3.Row
         try:
+            # WAL lets readers proceed while a write is in flight, and the
+            # pragmas below must be set before any transaction starts.
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.execute("PRAGMA synchronous=NORMAL")
+            conn.execute("PRAGMA busy_timeout=30000")
             yield conn
             conn.commit()
         finally:
