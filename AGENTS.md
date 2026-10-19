@@ -57,6 +57,39 @@ No API key is needed: the app runs against the simulator. Set
   it. Declared coordinates must also be consistent with the postcode or the geo
   check will (correctly) flag them.
 
+## Git workflow — keep local and GitHub in lockstep
+
+**The GitHub repo `adewaleolalekan/GuardPoint` is the source of truth, and the
+local checkout must always match it.** The user works from GitHub.
+
+Before starting work:
+
+```bash
+git fetch origin && git status          # confirm clean and not behind
+```
+
+After **any** local change, land it on `main` in the same session — do not leave
+work sitting uncommitted or unpushed:
+
+```bash
+git add -A && git commit -m "<what and why>" && git push origin main
+```
+
+Rules:
+
+- **Push to `main` directly.** No feature branches, no pull requests, unless the
+  user explicitly asks otherwise. (This is a deliberate, standing exception to
+  the usual "never push to main" default.)
+- Commit before ending a task. A change that exists only on disk is not
+  delivered — the user reads GitHub, not this sandbox.
+- Never leave the tree dirty between sessions.
+- `/workspace/project` and `/workspace/GuardPoint` are **two clones of the same
+  repo**. Keep both on `main`; if they drift, `git fetch origin && git reset
+  --hard origin/main`. `/workspace/project` is the one with the working
+  environment (deps installed), so prefer editing there.
+- Verify a push landed: `git rev-parse HEAD` must equal
+  `git rev-parse origin/main`.
+
 ## API notes (external)
 
 - Docs: https://docs.postcode.gov.ng/ ; index at `/llms.txt`, pages as `.md`.
