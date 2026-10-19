@@ -119,6 +119,50 @@ literal `<TUNNEL-ID>` placeholder was never substituted. Check with the
 **502 from Cloudflare.** The tunnel is up but the app is not. Check
 `curl -s http://127.0.0.1:8000/api/health` and `journalctl -u guardpoint`.
 
+### Rotating tunnel credentials
+
+There is **no in-place rotation** for a locally-managed tunnel. Cloudflare's
+docs state the tunnel credential (`.json`) "does not expire", and
+`cloudflared` reports at creation time: *"To revoke these credentials,
+delete the tunnel."* Deleting and recreating the tunnel is the only way.
+
+The leaked value matters only for that one tunnel — the account `cert.pem`
+is a separate, account-wide credential and is unaffected, so no
+`cloudflared tunnel login` is required.
+
+```bash
+sudo systemctl stop cloudflared 2>/dev/null
+sudo cloudflared service uninstall 2>/dev/null
+
+# Deleting the tunnel is what revokes the old secret.
+cloudflared tunnel delete -f guardpoint
+
+rm -f ~/.cloudflared/OLD-TUNNEL-ID.json
+sudo rm -f /etc/cloudflared/OLD-TUNNEL-ID.json
+
+cloudflared tunnel create guardpoint
+TUNNEL_ID=$(basename ~/.cloudflared/*.json .json)
+
+sudo cp ~/.cloudflared/"${TUNNEL_ID}".json /etc/cloudflared/
+sudo cp /opt/guardpoint/deploy/cloudflared.yml /etc/cloudflared/config.yml
+sudo sed -i "s|<TUNNEL-ID>|${TUNNEL_ID}|g" /etc/cloudflared/config.yml
+sudo chmod 600 /etc/cloudflared/*.json
+
+# Foreground test first.
+sudo cloudflared --config /etc/cloudflared/config.yml tunnel run
+
+cloudflared tunnel route dns guardpoint guardpoint-test.waletech.org
+sudo cloudflared service install
+```
+
+The old CNAME record still points at the deleted tunnel ID, so
+`tunnel route dns` may fail with "record already exists". Delete that CNAME
+in the Cloudflare dashboard and re-run it.
+
+Do the rotation **before** configuring Cloudflare Access: Access
+applications bind to the hostname, not the tunnel, so a policy would
+survive — but it is cleaner to set it up once, afterwards.
+
 ### 5. Gate it with Cloudflare Access — do not skip
 
 Zero Trust dashboard → **Access → Applications → Add an application →
