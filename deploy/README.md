@@ -166,8 +166,56 @@ survive — but it is cleaner to set it up once, afterwards.
 ### 5. Gate it with Cloudflare Access — do not skip
 
 Zero Trust dashboard → **Access → Applications → Add an application →
-Self-hosted** → hostname `guardpoint-test.waletech.org` → add a policy
-allowing only your email (or your Google/GitHub SSO group).
+Self-hosted** → hostname `guardpoint-test.waletech.org` → add a policy.
+
+**Leave the Path field blank** (or `/*`). If it is set to a sub-path, only
+that path is gated and the dashboard root stays public.
+
+The policy needs **two** rows. Omitting the second is the most common
+mistake — the login page appears and claims an email was sent, but nothing
+arrives, because the application has no permitted login method:
+
+| Action | Rule type | Selector | Value |
+| --- | --- | --- | --- |
+| Allow | Include | Emails | `you@waletech.org` |
+| Allow | Require | Login Method | `One-time PIN` |
+
+**Policy logic — this bites people:**
+
+* `Include` values are **OR**ed. Several emails in one Include rule is fine.
+* `Require` values are **AND**ed. Two different emails in a Require rule can
+  never both match, so *nobody* gets in.
+
+So put your address under **Include**, never under **Require**.
+
+Avoid these — Cloudflare flags both as "anyone will be able to access your
+application":
+
+* `Include → Everyone`
+* `Include → Emails ending in` with a broad or empty domain
+
+**Verify from outside the network:**
+
+```bash
+curl -sI https://guardpoint-test.waletech.org | head -5
+```
+
+* `302` to `https://<team>.cloudflareaccess.com/cdn/cgi/access/login/...`
+  means Access is active. Good.
+* `200` means Access is **not** applying — the hostname or path does not
+  match the application. Fix that before anything else.
+
+**Diagnosing:** Zero Trust → **Logs → Access** shows every request with its
+policy decision and the reason. Use it instead of guessing at the UI.
+
+Note that the login page always claims the PIN email was sent, even when no
+policy matched — Cloudflare does this to prevent account enumeration. If no
+email arrives, the policy is the problem, not email delivery.
+
+**Other known causes:** Firefox Private Window blocks the `CF_Authorization`
+cookie on XHR, which breaks the dashboard's `fetch()` calls; two Access
+applications on the same hostname conflict; and an existing session cookie
+may mean you are never re-prompted (test in a fresh private window).
 
 Until this exists, the dashboard, the API, `/docs` and the audit trail are
 all world-readable.
