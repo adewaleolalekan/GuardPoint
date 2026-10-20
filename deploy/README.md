@@ -165,20 +165,27 @@ survive — but it is cleaner to set it up once, afterwards.
 
 ### 5. Gate it with Cloudflare Access — do not skip
 
-Zero Trust dashboard → **Access → Applications → Add an application →
-Self-hosted** → hostname `guardpoint-test.waletech.org` → add a policy.
+**Current dashboard navigation** (the UI changed; older guides describe a
+different flow):
 
-**Leave the Path field blank** (or `/*`). If it is set to a sub-path, only
-that path is gated and the dashboard root stays public.
-
-The policy needs **two** rows. Omitting the second is the most common
-mistake — the login page appears and claims an email was sent, but nothing
-arrives, because the application has no permitted login method:
-
-| Action | Rule type | Selector | Value |
-| --- | --- | --- | --- |
-| Allow | Include | Emails | `you@waletech.org` |
-| Allow | Require | Login Method | `One-time PIN` |
+1. Zero Trust → **Access controls → Applications → Create new application**
+2. Select **Self-hosted and private**
+3. Under the destination type, select **Public DNS** — this is the public
+   hostname application. The other options are wrong for this deployment:
+   * *Private destinations* — private-network apps reached over WARP
+   * *Workers* — protects a Cloudflare Worker by name
+   * *Service auth* — machine-to-machine service tokens, no browser login
+4. Domain `waletech.org`, Subdomain `guardpoint-test`.
+   **Leave Path blank** — if set, only that path is gated and the dashboard
+   root stays public.
+5. Policy: `Allow` / `Include` / `Emails` → `you@waletech.org`
+6. On the **Login methods** page, leave *Accept all available identity
+   providers* enabled. This includes One-time PIN by default. If you
+   deselect it and choose nothing, no login method is permitted: the login
+   page appears, claims a code was sent, and none ever arrives.
+7. Under **Advanced settings → CORS**, enable *Bypass options requests to
+   origin*. The dashboard calls the API with `fetch()`; Access intercepting
+   those XHRs is a common cause of a dashboard that logs in but then errors.
 
 **Policy logic — this bites people:**
 
@@ -210,7 +217,8 @@ policy decision and the reason. Use it instead of guessing at the UI.
 
 Note that the login page always claims the PIN email was sent, even when no
 policy matched — Cloudflare does this to prevent account enumeration. If no
-email arrives, the policy is the problem, not email delivery.
+email arrives, the policy or login-method config is the problem, not email
+delivery.
 
 **Other known causes:** Firefox Private Window blocks the `CF_Authorization`
 cookie on XHR, which breaks the dashboard's `fetch()` calls; two Access
