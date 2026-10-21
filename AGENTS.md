@@ -90,6 +90,19 @@ Rules:
 - Verify a push landed: `git rev-parse HEAD` must equal
   `git rev-parse origin/main`.
 
+## Access control posture
+
+`app/data/clients.json` is **synthetic fixture data** — invented names, RC
+numbers and TINs. Do not treat it as a real client book, and do not describe
+its exposure as a data-protection incident. That mistake once led to
+over-escalating a Cloudflare Access setup the user did not need.
+
+Auth is optional and off by default: `DASHBOARD_USER` + `DASHBOARD_PASSWORD`
+both set enables HTTP Basic on every route including `/docs`. It is a
+single-operator stopgap, not a user system — no sessions, no per-user audit,
+no individual revocation. Real client data would need proper application
+auth, which does not exist yet.
+
 ## API notes (external)
 
 - Docs: https://docs.postcode.gov.ng/ ; index at `/llms.txt`, pages as `.md`.

@@ -163,7 +163,52 @@ Do the rotation **before** configuring Cloudflare Access: Access
 applications bind to the hostname, not the tunnel, so a policy would
 survive — but it is cleaner to set it up once, afterwards.
 
-### 5. Gate it with Cloudflare Access — do not skip
+### 5. Protect it — pick one, or skip for a throwaway test
+
+**Read this first.** The app ships with **synthetic** client records
+(`app/data/clients.json` is fixture data — invented names, RC numbers and
+TINs). Nothing here is real. How much protection you need depends on that:
+
+* **Synthetic data, simulator mode** → skipping protection is defensible.
+  You are testing a product, not holding client data.
+* **A live `POSTCODE_API_KEY` on a public URL** → protect it. Otherwise
+  anyone who finds the hostname can call `/api/postcode/*` and burn your
+  metered credits.
+* **Real client records** → you need proper application authentication
+  (user accounts, per-user permissions, an audit of who did what).
+  Neither option below is that.
+
+#### Option A — HTTP Basic auth in the app (simplest, recommended)
+
+Self-contained, no dashboard configuration, and it cannot be bypassed by a
+misconfigured Cloudflare rule. Enable by setting both variables:
+
+```bash
+sudo -u guardpoint tee -a /opt/guardpoint/.env >/dev/null <<'EOF'
+DASHBOARD_USER=operator
+DASHBOARD_PASSWORD=CHANGE-ME-use-a-long-random-value
+EOF
+sudo systemctl restart guardpoint
+```
+
+Every route is then gated, including `/docs`. Leave both unset and the app
+runs open, which is the default.
+
+Generate a password with:
+
+```bash
+python3 -c "import secrets; print(secrets.token_urlsafe(24))"
+```
+
+**Limits, stated plainly:** one shared credential, no sessions, no per-user
+audit trail, and no way to revoke one person. It is a stopgap for a
+single-operator test box — not a user management system.
+
+#### Option B — Cloudflare Access
+
+Gates traffic at Cloudflare's edge instead of in the app. Free for up to 50
+users. Useful when you want SSO (Google/GitHub/Microsoft) rather than a
+shared password.
 
 **Current dashboard navigation** (the UI changed; older guides describe a
 different flow):
@@ -225,8 +270,10 @@ cookie on XHR, which breaks the dashboard's `fetch()` calls; two Access
 applications on the same hostname conflict; and an existing session cookie
 may mean you are never re-prompted (test in a fresh private window).
 
-Until this exists, the dashboard, the API, `/docs` and the audit trail are
-all world-readable.
+**Access does not make the app itself secure** — it only gates traffic
+through Cloudflare. Direct access to `127.0.0.1:8000` on the box, or any
+future path that bypasses the tunnel, is unaffected. For defence in depth,
+Option A and Option B can both be enabled.
 
 ### 6. Verify
 

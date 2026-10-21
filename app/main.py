@@ -20,6 +20,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from .auth import BasicAuthMiddleware
 from .clients import ClientBook
 from .config import settings
 from .db import Store
@@ -34,6 +35,11 @@ app = FastAPI(
     version="1.0.0",
     description="Postcode-anchored risk & compliance verification for Nigerian businesses.",
 )
+
+# Only when DASHBOARD_USER and DASHBOARD_PASSWORD are both set; otherwise
+# the app is open, which keeps local use and the simulator frictionless.
+if settings.auth_enabled:
+    app.add_middleware(BasicAuthMiddleware)
 
 pc_client = build_client()
 store = Store(settings.db_path)

@@ -43,6 +43,16 @@ class Settings:
     port: int = field(default_factory=lambda: _int("PORT", 8000))
     db_path: str = field(default_factory=lambda: os.getenv("DB_PATH", str(ROOT / "guardpoint.db")))
 
+    # Optional HTTP Basic auth for the whole app. Off unless both are set,
+    # so local development and the simulator need no credentials.
+    dashboard_user: str = field(default_factory=lambda: os.getenv("DASHBOARD_USER", "").strip())
+    dashboard_password: str = field(default_factory=lambda: os.getenv("DASHBOARD_PASSWORD", ""))
+
+    @property
+    def auth_enabled(self) -> bool:
+        """True only when both a username and password are configured."""
+        return bool(self.dashboard_user and self.dashboard_password)
+
     @property
     def live(self) -> bool:
         """True when a real API key is configured; otherwise we simulate."""
